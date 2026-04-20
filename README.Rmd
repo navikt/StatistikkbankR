@@ -1,11 +1,8 @@
 ---
-title: "Introduction to ssbapi"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Introduction to ssbapi}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: github_document
 ---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -14,7 +11,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-## What is SSB?
+# Get SSB data
+
+<!-- badges: start -->
+<!-- badges: end -->
 
 Statistics Norway (SSB) is Norway's central statistical authority.
 It publishes hundreds of official statistics tables through its
@@ -24,7 +24,7 @@ economy, labour, housing, and health.
 The `ssbapi` package gives you a direct R interface to the
 Statistikkbank API.  You can search the table catalogue, inspect
 table structure, and download data as tidy `data.frame` or
-tibble objects — all without leaving R.
+tibble objects, directly in R.
 
 ## Installation
 
@@ -61,7 +61,7 @@ Alternatively, you can find tables of interest on SSB's [website](https://www.ss
 ## Inspecting a table before downloading
 
 Once you have a table identifier, use `ssb_describe()` to see its
-structure before downloading any data.
+structure before downloading it.
 
 ```{r describe, eval = FALSE}
 desc <- ssb_describe("07459")
@@ -157,9 +157,9 @@ include those constant-value columns explicitly:
 ```{r singletons, eval = FALSE}
 pop_one_region <- get_ssb_data(
     "07459",
-    Region              = "0301",
-    Tid                 = "top(3)",
-    table_format        = "long",
+    Region                 = "0301",
+    Tid                    = "top(3)",
+    table_format           = "long",
     include_singleton_dims = TRUE
 )
 ```
@@ -229,11 +229,9 @@ head(pop_expanded)
 ### Caching
 
 By default, `get_ssb_data()` and all helper functions cache table
-metadata in memory for the duration of your R session.  This means
-the first call for a given table fetches metadata from SSB, and all
-subsequent calls reuse it.  Set `cache = FALSE` to disable caching,
-or `refresh_metadata = TRUE` to discard the cached copy and fetch
-fresh metadata:
+metadata in memory for the duration of your R session.  Set
+`cache = FALSE` to disable caching, or `refresh_metadata = TRUE`
+to discard the cached copy and fetch fresh metadata:
 
 ```{r cache, eval = FALSE}
 # Force a fresh metadata fetch (e.g. after SSB updates the table)
@@ -244,8 +242,8 @@ get_ssb_data("07459", Tid = "top(1)", refresh_metadata = TRUE)
 
 SSB imposes a cell limit on queries.  `get_ssb_data()` estimates the
 result size before sending the request and stops with a message if
-the query is too large.  To proceed anyway (for example, if you know
-the estimate is conservative), set `override_large_query = TRUE`:
+the query is too large.  To proceed anyway, set
+`override_large_query = TRUE`:
 
 ```{r large, eval = FALSE}
 data <- get_ssb_data(
