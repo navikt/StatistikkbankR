@@ -26,7 +26,7 @@ Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
-pak::pak("navikt/get_ssb_data")
+pak::pak("navikt/StatistikkbankR")
 ```
 
 ## Finding a table
