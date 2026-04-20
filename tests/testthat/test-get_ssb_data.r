@@ -45,14 +45,14 @@ make_common_get_ssb_data_mocks <- function() {
 
 run_with_common_get_ssb_data_mocks <- function(code, overrides = list()) {
   common <- make_common_get_ssb_data_mocks()
-  args <- c(list(code = substitute(code), .package = "ssbapi"), common, overrides)
+  args <- c(list(code = substitute(code), .package = "StatistikkbankR"), common, overrides)
   do.call(testthat::with_mocked_bindings, args)
 }
 
 test_that("get_ssb_data uses POST request path when query exceeds max_get_query_chars", {
   run_with_common_get_ssb_data_mocks(
     {
-      out <- ssbapi::get_ssb_data("07459", max_get_query_chars = 100L)
+      out <- StatistikkbankR::get_ssb_data("07459", max_get_query_chars = 100L)
       expect_equal(out, "POST")
     },
     overrides = list(
@@ -73,7 +73,7 @@ test_that("get_ssb_data uses POST request path when query exceeds max_get_query_
 test_that("get_ssb_data always returns tidy output via GET path", {
   run_with_common_get_ssb_data_mocks(
     {
-      out <- ssbapi::get_ssb_data("07459", max_get_query_chars = 99999L)
+      out <- StatistikkbankR::get_ssb_data("07459", max_get_query_chars = 99999L)
       expect_equal(out, "tidy")
     },
     overrides = list(
@@ -93,7 +93,7 @@ test_that("get_ssb_data aborts when estimated rows exceed API limit", {
   run_with_common_get_ssb_data_mocks(
     {
       expect_error(
-        ssbapi::get_ssb_data("07459"),
+        StatistikkbankR::get_ssb_data("07459"),
         "exceeds the API-reported limit"
       )
     },
@@ -114,7 +114,7 @@ test_that("get_ssb_data aborts when estimated rows exceed API limit", {
 test_that("get_ssb_data bypasses large-query guard when override_large_query is TRUE", {
   run_with_common_get_ssb_data_mocks(
     {
-      out <- ssbapi::get_ssb_data("07459", override_large_query = TRUE)
+      out <- StatistikkbankR::get_ssb_data("07459", override_large_query = TRUE)
       expect_equal(out, "GET")
     },
     overrides = list(
@@ -140,7 +140,7 @@ test_that("get_ssb_data bypasses large-query guard when override_large_query is 
 test_that("get_ssb_data forwards codelists and output_values to GET request builder", {
   run_with_common_get_ssb_data_mocks(
     {
-      out <- ssbapi::get_ssb_data(
+      out <- StatistikkbankR::get_ssb_data(
         "07459",
         codelists = list(Region = "agg_KommSummer"),
         output_values = list(Region = "aggregated"),
@@ -177,7 +177,7 @@ test_that("get_ssb_data forwards codelists and output_values to GET request buil
 test_that("get_ssb_data forwards codelists and output_values to POST request builder", {
   run_with_common_get_ssb_data_mocks(
     {
-      out <- ssbapi::get_ssb_data(
+      out <- StatistikkbankR::get_ssb_data(
         "07459",
         codelists = list(Region = "agg_KommSummer"),
         output_values = list(Region = "single"),

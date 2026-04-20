@@ -1,4 +1,4 @@
-#' ssbapi: Access Statistikkbank Data from Statistics Norway
+#' StatistikkbankR: Access Statistikkbank Data from Statistics Norway
 #'
 #' @description
 #' Statistics Norway (SSB) publishes a wide range of official statistics

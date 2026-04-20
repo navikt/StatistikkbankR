@@ -112,7 +112,7 @@ test_that(".count_chunked_data_requests returns 1 when query size is below limit
     ),
     .build_query_params = function(...) list(lang = "no"),
     .estimate_query_size = function(...) 10L,
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 
   expect_equal(out, 1L)
@@ -132,7 +132,7 @@ test_that(".count_chunked_data_requests splits recursively on largest dimension"
       }
       10L
     },
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 
   expect_equal(out, 4L)
@@ -149,7 +149,7 @@ test_that(".execute_chunked_data_requests aborts when query is too large and uns
       ),
       .build_query_params = function(language, completed_filters, ...) completed_filters,
       .estimate_query_size = function(...) 9999L,
-      .package = "ssbapi"
+      .package = "StatistikkbankR"
     ),
     "cannot be split further"
   )
@@ -175,7 +175,7 @@ test_that(".execute_chunked_data_requests returns parsed chunks from recursive s
     },
     .execute_request_spec = function(request_spec) request_spec,
     .parse_response_json = function(resp) list(values = resp$filters$Tid),
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 
   expect_length(out, 4L)

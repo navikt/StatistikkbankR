@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(ssbapi)
+library(StatistikkbankR)
 
-test_check("ssbapi")
+test_check("StatistikkbankR")

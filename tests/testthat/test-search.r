@@ -28,7 +28,7 @@ test_that("ssb_search keeps pagination attributes for single page", {
 
   with_mocked_bindings(
     {
-      out <- ssbapi::ssb_search(query = "befolkning", page = 2L, page_size = 2L, fetch_all = FALSE, as_tibble = FALSE)
+      out <- StatistikkbankR::ssb_search(query = "befolkning", page = 2L, page_size = 2L, fetch_all = FALSE, as_tibble = FALSE)
       expect_equal(nrow(out), 2L)
       expect_equal(attr(out, "page_number"), 2L)
       expect_equal(attr(out, "page_size"), 2L)
@@ -50,7 +50,7 @@ test_that("ssb_search keeps pagination attributes for single page", {
         stop("Unexpected extra page parse")
       }
     },
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 })
 
@@ -59,7 +59,7 @@ test_that("ssb_search fetch_all combines pages and updates final attributes", {
 
   with_mocked_bindings(
     {
-      out <- ssbapi::ssb_search(query = "befolkning", page = 1L, page_size = 2L, fetch_all = TRUE, as_tibble = FALSE)
+      out <- StatistikkbankR::ssb_search(query = "befolkning", page = 1L, page_size = 2L, fetch_all = TRUE, as_tibble = FALSE)
       expect_equal(nrow(out), 4L)
       expect_equal(out$id, c("a", "b", "c", "d"))
       expect_equal(attr(out, "page_number"), 2L)
@@ -82,14 +82,14 @@ test_that("ssb_search fetch_all combines pages and updates final attributes", {
 
       make_search_page_result(page_number = 2L, total_pages = 2L, ids = c("c", "d"))
     },
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 })
 
 test_that("ssb_search returns tibble when as_tibble is TRUE", {
   with_mocked_bindings(
     {
-      out <- ssbapi::ssb_search(query = "befolkning", fetch_all = FALSE, as_tibble = TRUE)
+      out <- StatistikkbankR::ssb_search(query = "befolkning", fetch_all = FALSE, as_tibble = TRUE)
       expect_s3_class(out, "tbl_df")
     },
     .build_tables_request_spec = function(query, language, page, page_size) {
@@ -98,10 +98,10 @@ test_that("ssb_search returns tibble when as_tibble is TRUE", {
     .execute_request_spec = function(request_spec) request_spec,
     .parse_response_json = function(resp) list(page = resp$page),
     .parse_tables_response = function(parsed) make_search_page_result(page_number = 1L, total_pages = 1L, ids = c("a", "b")),
-    .package = "ssbapi"
+    .package = "StatistikkbankR"
   )
 })
 
 test_that("ssb_search rejects invalid query input", {
-  expect_error(ssbapi::ssb_search(query = 123), "query")
+  expect_error(StatistikkbankR::ssb_search(query = 123), "query")
 })

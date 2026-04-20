@@ -1,18 +1,21 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Get SSB data
+# StatistikkbankR
 
 <!-- badges: start -->
 
 <!-- badges: end -->
+
+An R-package for accessing Statistikkbank data from Statistics Norway
+(SSB).
 
 Statistics Norway (SSB) is Norway’s central statistical authority. It
 publishes hundreds of official statistics tables through its
 Statistikkbank service, covering topics such as population, economy,
 labour, housing, and health.
 
-The `ssbapi` package gives you a direct R interface to the
+The `StatistikkbankR` package gives you a direct R interface to the
 Statistikkbank API. You can search the table catalogue, inspect table
 structure, and download data as tidy `data.frame` or tibble objects,
 directly in R.
@@ -23,7 +26,7 @@ Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
-pak::pak("navikt/ssbapi")
+pak::pak("navikt/get_ssb_data")
 ```
 
 ## Finding a table
@@ -33,7 +36,7 @@ data frame with one row per matching table; the `id` column is what you
 will pass to other functions.
 
 ``` r
-library(ssbapi)
+library(StatistikkbankR)
 
 # Search for tables about population (in Norwegian)
 results <- ssb_search("befolkning")

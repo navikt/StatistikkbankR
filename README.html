@@ -12,7 +12,7 @@
 
 
 
-<title>Introduction to ssbapi</title>
+<title>Introduction to StatistikkbankR</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -337,7 +337,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Introduction to ssbapi</h1>
+<h1 class="title toc-ignore">Introduction to StatistikkbankR</h1>
 
 
 
@@ -347,7 +347,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 publishes hundreds of official statistics tables through its
 Statistikkbank service, covering topics such as population, economy,
 labour, housing, and health.</p>
-<p>The <code>ssbapi</code> package gives you a direct R interface to the
+<p>The <code>StatistikkbankR</code> package gives you a direct R interface to the
 Statistikkbank API. You can search the table catalogue, inspect table
 structure, and download data as tidy <code>data.frame</code> or tibble
 objects — all without leaving R.</p>
@@ -356,14 +356,14 @@ objects — all without leaving R.</p>
 <h2>Installation</h2>
 <p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># install.packages(&quot;pak&quot;)</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;navikt/ssbapi&quot;</span>)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;navikt/StatistikkbankR&quot;</span>)</span></code></pre></div>
 </div>
 <div id="finding-a-table" class="section level2">
 <h2>Finding a table</h2>
 <p>Use <code>ssb_search()</code> to find tables by keyword. The function
 returns a data frame with one row per matching table; the
 <code>id</code> column is what you will pass to other functions.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(ssbapi)</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(StatistikkbankR)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Search for tables about population (in Norwegian)</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">ssb_search</span>(<span class="st">&quot;befolkning&quot;</span>)</span>

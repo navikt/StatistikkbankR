@@ -1,5 +1,5 @@
-Package: ssbapi
-Title: Access Statistikkbank data from Statistics Norway (SSB) API
+Package: StatistikkbankR
+Title: Access Statistikkbank data from Statistics Norway (SSB) 
 Version: 0.1.0
 Authors@R: 
     person("Tobias", "Lunde", , "tobias.lunde@nav.no", role = c("aut", "cre"))
