@@ -1,54 +1,255 @@
 ---
-output: github_document
+title: "Introduction to ssbapi"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to ssbapi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
+    collapse = TRUE,
+    comment  = "#>"
 )
 ```
 
-# ssbapi
+## What is SSB?
 
-<!-- badges: start -->
-<!-- badges: end -->
+Statistics Norway (SSB) is Norway's central statistical authority.
+It publishes hundreds of official statistics tables through its
+Statistikkbank service, covering topics such as population,
+economy, labour, housing, and health.
 
-The goal of ssbapi is to ...
+The `ssbapi` package gives you a direct R interface to the
+Statistikkbank API.  You can search the table catalogue, inspect
+table structure, and download data as tidy `data.frame` or
+tibble objects — all without leaving R.
 
 ## Installation
 
-You can install the development version of ssbapi like so:
+Install the development version from GitHub:
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r install, eval = FALSE}
+# install.packages("pak")
+pak::pak("navikt/ssbapi")
 ```
 
-## Example
+## Finding a table
 
-This is a basic example which shows you how to solve a common problem:
+Use `ssb_search()` to find tables by keyword. The function returns
+a data frame with one row per matching table; the `id` column is what
+you will pass to other functions.
 
-```{r example}
+```{r search, eval = FALSE}
 library(ssbapi)
-## basic example code
+
+# Search for tables about population (in Norwegian)
+results <- ssb_search("befolkning")
+results[, c("id", "label", "updated")]
+
+# Or search in English
+ssb_search("population", language = "en")
+
+# Retrieve all pages at once
+all_results <- ssb_search("arbeid", fetch_all = TRUE)
+nrow(all_results)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+Alternatively, you can find tables of interest on SSB's [website](https://www.ssb.no/statbank).
 
-```{r cars}
-summary(cars)
+## Inspecting a table before downloading
+
+Once you have a table identifier, use `ssb_describe()` to see its
+structure before downloading any data.
+
+```{r describe, eval = FALSE}
+desc <- ssb_describe("07459")
+
+# Table-level summary: title, last updated, estimated total rows
+desc$table
+
+# One row per dimension: id, label, role, number of codes
+desc$dimensions
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+Use `ssb_codes()` to list the valid values you can use as filters
+for a given dimension:
 
-You can also embed plots, for example:
+```{r codes, eval = FALSE}
+# All valid codes for the Region dimension
+ssb_codes("07459", "Region")
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+# All valid time periods
+ssb_codes("07459", "Tid")
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+## Downloading data
+
+### Without filters
+
+Pass a table identifier to `get_ssb_data()` to download the full
+table.  SSB enforces a cell limit on large tables; the function will
+warn you and stop if the estimated row count is too high.
+
+```{r download-all, eval = FALSE}
+# Download all data (only works for small tables)
+data <- get_ssb_data("05803")
+head(data)
+```
+
+### Filtering by dimension
+
+Pass dimension identifiers as named arguments to select only the
+rows you need.  Each argument accepts a character vector of codes.
+
+```{r download-filter, eval = FALSE}
+# Download population for specific regions and the latest 5 years
+pop <- get_ssb_data(
+    "07459",
+    Region = c("0301", "1103"),
+    Tid    = "top(5)"
+)
+pop
+```
+
+### Server-side expressions
+
+SSB supports a set of shorthand expressions that are evaluated on
+the server before data is returned.  You can use these as filter
+values:
+
+| Expression | Meaning |
+|---|---|
+| `"top(n)"` | The n most recent time periods |
+| `"bottom(n)"` | The n oldest time periods |
+| `"all(*)"` | All codes (the default if you omit the argument) |
+
+```{r expressions, eval = FALSE}
+# The three most recent years for all regions
+pop_recent <- get_ssb_data(
+    "07459",
+    Tid = "top(3)"
+)
+```
+
+## Long format and singleton dimensions
+
+By default `get_ssb_data()` returns data in wide format: one column
+per measure code.  Use `table_format = "long"` to get a tidy long
+table instead, with one row per observation.
+
+```{r long, eval = FALSE}
+pop_long <- get_ssb_data(
+    "07459",
+    Tid          = "top(3)",
+    table_format = "long"
+)
+head(pop_long)
+```
+
+When filtering to a single code in one dimension, that dimension
+collapses to a constant and is dropped from the wide output but
+retained in long output by default.  Pass
+`include_singleton_dims = TRUE` with `table_format = "long"` to
+include those constant-value columns explicitly:
+
+```{r singletons, eval = FALSE}
+pop_one_region <- get_ssb_data(
+    "07459",
+    Region              = "0301",
+    Tid                 = "top(3)",
+    table_format        = "long",
+    include_singleton_dims = TRUE
+)
+```
+
+## Codelists and geographic boundary changes
+
+SSB provides aggregation codelists that let you request data at
+a different grouping level — for example, historical municipality
+boundaries — without manually remapping individual codes.
+
+Use `ssb_codelists()` to discover which codelists are available:
+
+```{r codelists, eval = FALSE}
+ssb_codelists("07459")
+
+# Filter to the geographic dimension
+ssb_codelists("07459", dimension = "Region")
+```
+
+Use `ssb_codelist_details()` to inspect the group-to-member mapping
+inside a specific codelist:
+
+```{r codelist-details, eval = FALSE}
+cl <- ssb_codelist_details("agg_KommSummer")
+cl$codelist   # metadata
+cl$values     # group codes and their members
+```
+
+Apply a codelist when downloading data by passing the `codelists`
+and `output_values` arguments to `get_ssb_data()`:
+
+```{r download-codelist, eval = FALSE}
+pop_agg <- get_ssb_data(
+    "07459",
+    Tid           = "top(3)",
+    codelists     = list(Region = "agg_KommSummer"),
+    output_values = list(Region = "aggregated")
+)
+```
+
+Or use the convenience wrapper `ssb_get_by_codelist()` which
+identifies the correct dimension automatically:
+
+```{r get-by-codelist, eval = FALSE}
+pop_agg <- ssb_get_by_codelist(
+    "07459",
+    "agg_KommSummer",
+    Tid          = "top(3)",
+    output_value = "aggregated"
+)
+```
+
+To join the aggregated result back to individual municipality codes,
+use `ssb_expand_codelist_mapping()`:
+
+```{r expand-codelist, eval = FALSE}
+pop_expanded <- ssb_expand_codelist_mapping(
+    data        = pop_agg,
+    code_col    = "Region",
+    codelist_id = "agg_KommSummer"
+)
+head(pop_expanded)
+```
+
+## Performance tips
+
+### Caching
+
+By default, `get_ssb_data()` and all helper functions cache table
+metadata in memory for the duration of your R session.  This means
+the first call for a given table fetches metadata from SSB, and all
+subsequent calls reuse it.  Set `cache = FALSE` to disable caching,
+or `refresh_metadata = TRUE` to discard the cached copy and fetch
+fresh metadata:
+
+```{r cache, eval = FALSE}
+# Force a fresh metadata fetch (e.g. after SSB updates the table)
+get_ssb_data("07459", Tid = "top(1)", refresh_metadata = TRUE)
+```
+
+### Large tables
+
+SSB imposes a cell limit on queries.  `get_ssb_data()` estimates the
+result size before sending the request and stops with a message if
+the query is too large.  To proceed anyway (for example, if you know
+the estimate is conservative), set `override_large_query = TRUE`:
+
+```{r large, eval = FALSE}
+data <- get_ssb_data(
+    "07459",
+    override_large_query = TRUE
+)
+```

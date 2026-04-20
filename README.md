@@ -1,2 +1,565 @@
-# get_ssb_data
-R-pakke for å hente data fra Statistikkbanken til SSB
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to ssbapi</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to ssbapi</h1>
+
+
+
+<div id="what-is-ssb" class="section level2">
+<h2>What is SSB?</h2>
+<p>Statistics Norway (SSB) is Norway’s central statistical authority. It
+publishes hundreds of official statistics tables through its
+Statistikkbank service, covering topics such as population, economy,
+labour, housing, and health.</p>
+<p>The <code>ssbapi</code> package gives you a direct R interface to the
+Statistikkbank API. You can search the table catalogue, inspect table
+structure, and download data as tidy <code>data.frame</code> or tibble
+objects — all without leaving R.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>Install the development version from GitHub:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># install.packages(&quot;pak&quot;)</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">&quot;navikt/ssbapi&quot;</span>)</span></code></pre></div>
+</div>
+<div id="finding-a-table" class="section level2">
+<h2>Finding a table</h2>
+<p>Use <code>ssb_search()</code> to find tables by keyword. The function
+returns a data frame with one row per matching table; the
+<code>id</code> column is what you will pass to other functions.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(ssbapi)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Search for tables about population (in Norwegian)</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">ssb_search</span>(<span class="st">&quot;befolkning&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>results[, <span class="fu">c</span>(<span class="st">&quot;id&quot;</span>, <span class="st">&quot;label&quot;</span>, <span class="st">&quot;updated&quot;</span>)]</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Or search in English</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">ssb_search</span>(<span class="st">&quot;population&quot;</span>, <span class="at">language =</span> <span class="st">&quot;en&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Retrieve all pages at once</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>all_results <span class="ot">&lt;-</span> <span class="fu">ssb_search</span>(<span class="st">&quot;arbeid&quot;</span>, <span class="at">fetch_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">nrow</span>(all_results)</span></code></pre></div>
+<p>Alternatively, you can find tables of interest on SSB’s <a href="https://www.ssb.no/statbank">website</a>.</p>
+</div>
+<div id="inspecting-a-table-before-downloading" class="section level2">
+<h2>Inspecting a table before downloading</h2>
+<p>Once you have a table identifier, use <code>ssb_describe()</code> to
+see its structure before downloading any data.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>desc <span class="ot">&lt;-</span> <span class="fu">ssb_describe</span>(<span class="st">&quot;07459&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># Table-level summary: title, last updated, estimated total rows</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>desc<span class="sc">$</span>table</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># One row per dimension: id, label, role, number of codes</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>desc<span class="sc">$</span>dimensions</span></code></pre></div>
+<p>Use <code>ssb_codes()</code> to list the valid values you can use as
+filters for a given dimension:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># All valid codes for the Region dimension</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">ssb_codes</span>(<span class="st">&quot;07459&quot;</span>, <span class="st">&quot;Region&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># All valid time periods</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">ssb_codes</span>(<span class="st">&quot;07459&quot;</span>, <span class="st">&quot;Tid&quot;</span>)</span></code></pre></div>
+</div>
+<div id="downloading-data" class="section level2">
+<h2>Downloading data</h2>
+<div id="without-filters" class="section level3">
+<h3>Without filters</h3>
+<p>Pass a table identifier to <code>get_ssb_data()</code> to download
+the full table. SSB enforces a cell limit on large tables; the function
+will warn you and stop if the estimated row count is too high.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Download all data (only works for small tables)</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(<span class="st">&quot;05803&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">head</span>(data)</span></code></pre></div>
+</div>
+<div id="filtering-by-dimension" class="section level3">
+<h3>Filtering by dimension</h3>
+<p>Pass dimension identifiers as named arguments to select only the rows
+you need. Each argument accepts a character vector of codes.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Download population for specific regions and the latest 5 years</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>    <span class="at">Region =</span> <span class="fu">c</span>(<span class="st">&quot;0301&quot;</span>, <span class="st">&quot;1103&quot;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">Tid    =</span> <span class="st">&quot;top(5)&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>pop</span></code></pre></div>
+</div>
+<div id="server-side-expressions" class="section level3">
+<h3>Server-side expressions</h3>
+<p>SSB supports a set of shorthand expressions that are evaluated on the
+server before data is returned. You can use these as filter values:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Expression</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>&quot;top(n)&quot;</code></td>
+<td>The n most recent time periods</td>
+</tr>
+<tr class="even">
+<td><code>&quot;bottom(n)&quot;</code></td>
+<td>The n oldest time periods</td>
+</tr>
+<tr class="odd">
+<td><code>&quot;all(*)&quot;</code></td>
+<td>All codes (the default if you omit the argument)</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># The three most recent years for all regions</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>pop_recent <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">Tid =</span> <span class="st">&quot;top(3)&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="long-format-and-singleton-dimensions" class="section level2">
+<h2>Long format and singleton dimensions</h2>
+<p>By default <code>get_ssb_data()</code> returns data in wide format:
+one column per measure code. Use <code>table_format = &quot;long&quot;</code> to
+get a tidy long table instead, with one row per observation.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>pop_long <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>    <span class="at">Tid          =</span> <span class="st">&quot;top(3)&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">table_format =</span> <span class="st">&quot;long&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="fu">head</span>(pop_long)</span></code></pre></div>
+<p>When filtering to a single code in one dimension, that dimension
+collapses to a constant and is dropped from the wide output but retained
+in long output by default. Pass
+<code>include_singleton_dims = TRUE</code> with
+<code>table_format = &quot;long&quot;</code> to include those constant-value
+columns explicitly:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>pop_one_region <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">Region              =</span> <span class="st">&quot;0301&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="at">Tid                 =</span> <span class="st">&quot;top(3)&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">table_format        =</span> <span class="st">&quot;long&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">include_singleton_dims =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="codelists-and-geographic-boundary-changes" class="section level2">
+<h2>Codelists and geographic boundary changes</h2>
+<p>SSB provides aggregation codelists that let you request data at a
+different grouping level — for example, historical municipality
+boundaries — without manually remapping individual codes.</p>
+<p>Use <code>ssb_codelists()</code> to discover which codelists are
+available:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">ssb_codelists</span>(<span class="st">&quot;07459&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co"># Filter to the geographic dimension</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">ssb_codelists</span>(<span class="st">&quot;07459&quot;</span>, <span class="at">dimension =</span> <span class="st">&quot;Region&quot;</span>)</span></code></pre></div>
+<p>Use <code>ssb_codelist_details()</code> to inspect the
+group-to-member mapping inside a specific codelist:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>cl <span class="ot">&lt;-</span> <span class="fu">ssb_codelist_details</span>(<span class="st">&quot;agg_KommSummer&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>cl<span class="sc">$</span>codelist   <span class="co"># metadata</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>cl<span class="sc">$</span>values     <span class="co"># group codes and their members</span></span></code></pre></div>
+<p>Apply a codelist when downloading data by passing the
+<code>codelists</code> and <code>output_values</code> arguments to
+<code>get_ssb_data()</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>pop_agg <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>    <span class="at">Tid           =</span> <span class="st">&quot;top(3)&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>    <span class="at">codelists     =</span> <span class="fu">list</span>(<span class="at">Region =</span> <span class="st">&quot;agg_KommSummer&quot;</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>    <span class="at">output_values =</span> <span class="fu">list</span>(<span class="at">Region =</span> <span class="st">&quot;aggregated&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>)</span></code></pre></div>
+<p>Or use the convenience wrapper <code>ssb_get_by_codelist()</code>
+which identifies the correct dimension automatically:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>pop_agg <span class="ot">&lt;-</span> <span class="fu">ssb_get_by_codelist</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="st">&quot;agg_KommSummer&quot;</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="at">Tid          =</span> <span class="st">&quot;top(3)&quot;</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="at">output_value =</span> <span class="st">&quot;aggregated&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>)</span></code></pre></div>
+<p>To join the aggregated result back to individual municipality codes,
+use <code>ssb_expand_codelist_mapping()</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>pop_expanded <span class="ot">&lt;-</span> <span class="fu">ssb_expand_codelist_mapping</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>    <span class="at">data        =</span> pop_agg,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    <span class="at">code_col    =</span> <span class="st">&quot;Region&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="at">codelist_id =</span> <span class="st">&quot;agg_KommSummer&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="fu">head</span>(pop_expanded)</span></code></pre></div>
+</div>
+<div id="performance-tips" class="section level2">
+<h2>Performance tips</h2>
+<div id="caching" class="section level3">
+<h3>Caching</h3>
+<p>By default, <code>get_ssb_data()</code> and all helper functions
+cache table metadata in memory for the duration of your R session. This
+means the first call for a given table fetches metadata from SSB, and
+all subsequent calls reuse it. Set <code>cache = FALSE</code> to disable
+caching, or <code>refresh_metadata = TRUE</code> to discard the cached
+copy and fetch fresh metadata:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Force a fresh metadata fetch (e.g. after SSB updates the table)</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">get_ssb_data</span>(<span class="st">&quot;07459&quot;</span>, <span class="at">Tid =</span> <span class="st">&quot;top(1)&quot;</span>, <span class="at">refresh_metadata =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="large-tables" class="section level3">
+<h3>Large tables</h3>
+<p>SSB imposes a cell limit on queries. <code>get_ssb_data()</code>
+estimates the result size before sending the request and stops with a
+message if the query is too large. To proceed anyway (for example, if
+you know the estimate is conservative), set
+<code>override_large_query = TRUE</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">get_ssb_data</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    <span class="st">&quot;07459&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    <span class="at">override_large_query =</span> <span class="cn">TRUE</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
