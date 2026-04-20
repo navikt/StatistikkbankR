@@ -44,7 +44,12 @@ results[, c("id", "label", "updated")]
 
 # Or search in English
 ssb_search("population", language = "en")
+```
 
+SSB paginates search results; use `fetch_all = TRUE` if you want all
+pages at once.
+
+``` r
 # Retrieve all pages at once
 all_results <- ssb_search("arbeid", fetch_all = TRUE)
 nrow(all_results)
@@ -56,7 +61,8 @@ Alternatively, you can find tables of interest on SSB’s
 ## Inspecting a table before downloading
 
 Once you have a table identifier, use `ssb_describe()` to see its
-structure before downloading it.
+structure before downloading it. This is the recommended first command
+to run once you have a table you’re interested in.
 
 ``` r
 desc <- ssb_describe("07459")
@@ -99,11 +105,11 @@ Pass dimension identifiers as named arguments to select only the rows
 you need. Each argument accepts a character vector of codes.
 
 ``` r
-# Download population for specific regions and the latest 5 years
+# Download population for specific regions for the years 2020, 2021 and 2022
 pop <- get_ssb_data(
     "07459",
     Region = c("0301", "1103"),
-    Tid    = "top(5)"
+    Tid    = 2020:2022
 )
 pop
 ```
@@ -127,16 +133,20 @@ pop_recent <- get_ssb_data(
 )
 ```
 
+For more details on the possible query expressions, see the [SSB API
+documentation](https://www.ssb.no/en/api/pxwebapiv2).
+
 ## Long format and singleton dimensions
 
 By default `get_ssb_data()` returns data in wide format: one column per
-measure code. Use `table_format = "long"` to get a tidy long table
-instead, with one row per observation.
+measure code. Use `table_format = "long"` to get a long table instead,
+with one row per observation.
 
 ``` r
 pop_long <- get_ssb_data(
     "07459",
-    Tid          = "top(3)",
+    Region = c("0301", "1103"),
+    Tid    = 2020:2022,
     table_format = "long"
 )
 head(pop_long)
@@ -164,6 +174,10 @@ SSB provides aggregation codelists that let you request data at a
 different grouping level — for example, historical municipality
 boundaries — without manually remapping individual codes.
 
+SSB’s [`klassR`](https://statisticsnorway.github.io/ssb-klassr/) package
+provides an easy interface for retrieving SSB classifications, and may
+be used alongside this package.
+
 Use `ssb_codelists()` to discover which codelists are available:
 
 ``` r
@@ -188,7 +202,7 @@ Apply a codelist when downloading data by passing the `codelists` and
 ``` r
 pop_agg <- get_ssb_data(
     "07459",
-    Tid           = "top(3)",
+    Tid           = 2020:2022,
     codelists     = list(Region = "agg_KommSummer"),
     output_values = list(Region = "aggregated")
 )
@@ -201,7 +215,7 @@ the correct dimension automatically:
 pop_agg <- ssb_get_by_codelist(
     "07459",
     "agg_KommSummer",
-    Tid          = "top(3)",
+    Tid          = 2020:2022,
     output_value = "aggregated"
 )
 ```
@@ -212,7 +226,7 @@ To join the aggregated result back to individual municipality codes, use
 ``` r
 pop_expanded <- ssb_expand_codelist_mapping(
     data        = pop_agg,
-    code_col    = "Region",
+    code_col    = "Region_code",
     codelist_id = "agg_KommSummer"
 )
 head(pop_expanded)
@@ -231,6 +245,9 @@ discard the cached copy and fetch fresh metadata:
 # Force a fresh metadata fetch (e.g. after SSB updates the table)
 get_ssb_data("07459", Tid = "top(1)", refresh_metadata = TRUE)
 ```
+
+For details on when SSB updates their tables, see their
+[https://www.ssb.no/en/statbank/](website).
 
 ### Large tables
 
