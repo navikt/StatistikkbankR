@@ -110,12 +110,13 @@ test_that(".validate_main_args accepts valid args", {
       include_singleton_dims = FALSE,
       include_status = FALSE,
       character_as_factor = TRUE,
-      quarter_as = "year_quarter"
+      convert_quarter_to_yearqtr = TRUE,
+      convert_month_to_yearmon = TRUE
     )
   )
 })
 
-test_that(".validate_main_args rejects invalid quarter_as", {
+test_that(".validate_main_args rejects non-boolean convert_quarter_to_yearqtr", {
   expect_error(
     .validate_main_args(
       table_id = "07459",
@@ -126,9 +127,10 @@ test_that(".validate_main_args rejects invalid quarter_as", {
       include_singleton_dims = FALSE,
       include_status = FALSE,
       character_as_factor = TRUE,
-      quarter_as = "foo"
+      convert_quarter_to_yearqtr = "yes",
+      convert_month_to_yearmon = TRUE
     ),
-    "quarter_as"
+    "convert_quarter_to_yearqtr"
   )
 })
 
@@ -143,7 +145,8 @@ test_that(".validate_main_args rejects non-boolean character_as_factor", {
       include_singleton_dims = FALSE,
       include_status = FALSE,
       character_as_factor = "yes",
-      quarter_as = "year_quarter"
+      convert_quarter_to_yearqtr = TRUE,
+      convert_month_to_yearmon = TRUE
     ),
     "character_as_factor"
   )

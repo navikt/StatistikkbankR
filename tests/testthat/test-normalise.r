@@ -30,8 +30,3 @@ test_that(".normalise_output_values lowercases and trims", {
 test_that(".normalise_output_values returns empty list for NULL input", {
   expect_equal(.normalise_output_values(NULL), list())
 })
-
-test_that(".normalise_quarter_as lowercases and trims", {
-  expect_equal(.normalise_quarter_as("  YEAR_QUARTER  "), "year_quarter")
-  expect_equal(.normalise_quarter_as("Character"), "character")
-})

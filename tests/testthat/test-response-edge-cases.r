@@ -5,6 +5,7 @@ test_that(".apply_output_types handles all NA column", {
 })
 
 test_that(".apply_output_types with mixed types", {
+  skip_if_not_installed("zoo")
   grid <- data.frame(
     Region_label = c("Oslo", "Bergen"),
     Tid_label = c("2023K1", "2023K2"),
@@ -13,7 +14,7 @@ test_that(".apply_output_types with mixed types", {
   )
   result <- StatistikkbankR:::.apply_output_types(grid, TRUE, "year_quarter")
   expect_true(is.factor(result$Region_label))
-  expect_equal(result$Tid_label, c("2023-Q1", "2023-Q2"))
+  expect_true("yearqtr" %in% class(result$Tid_label))
   expect_true(is.numeric(result$value))
   expect_true(is.integer(result$id))
 })

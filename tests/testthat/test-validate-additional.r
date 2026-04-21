@@ -117,8 +117,3 @@ test_that(".normalise_filters handles multiple dimensions", {
   expect_equal(result$Region, c("01", "02"))
   expect_equal(result$Tid, c("2020", "2021"))
 })
-
-test_that(".normalise_quarter_as handles raw value", {
-  expect_equal(.normalise_quarter_as("year_quarter"), "year_quarter")
-  expect_equal(.normalise_quarter_as("character"), "character")
-})

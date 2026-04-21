@@ -208,31 +208,32 @@ test_that(".coerce_time_dimensions returns grid for long format", {
 })
 
 test_that(".apply_output_types converts quarters to year-quarter format", {
+  skip_if_not_installed("zoo")
   grid <- data.frame(Tid_label = c("2023K1", "2023K2"), value = c(1, 2))
-  result <- StatistikkbankR:::.apply_output_types(grid, FALSE, "year_quarter")
-  expect_equal(result$Tid_label, c("2023-Q1", "2023-Q2"))
+  result <- StatistikkbankR:::.apply_output_types(grid, FALSE, TRUE, FALSE)
+  expect_true("yearqtr" %in% class(result$Tid_label))
 })
 
-test_that(".apply_output_types preserves quarters when quarter_as is not year_quarter", {
+test_that(".apply_output_types preserves quarters when conversion disabled", {
   grid <- data.frame(Tid_label = c("2023K1", "2023K2"), value = c(1, 2))
-  result <- StatistikkbankR:::.apply_output_types(grid, FALSE, "raw")
+  result <- StatistikkbankR:::.apply_output_types(grid, FALSE, FALSE, FALSE)
   expect_equal(result$Tid_label, c("2023K1", "2023K2"))
 })
 
 test_that(".apply_output_types converts characters to factors", {
   grid <- data.frame(Region_label = c("Oslo", "Bergen"), value = c(1, 2))
-  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, "raw")
+  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, FALSE, FALSE)
   expect_true(is.factor(result$Region_label))
 })
 
 test_that(".apply_output_types handles empty dataframe", {
   grid <- data.frame()
-  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, "year_quarter")
+  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, TRUE, TRUE)
   expect_equal(nrow(result), 0)
 })
 
 test_that(".apply_output_types preserves numeric columns", {
   grid <- data.frame(Region_label = "Oslo", value = c(1.5, 2.5))
-  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, "raw")
+  result <- StatistikkbankR:::.apply_output_types(grid, TRUE, FALSE, FALSE)
   expect_true(is.numeric(result$value))
 })

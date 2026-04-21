@@ -47,6 +47,7 @@ make_two_dim_json_stat <- function() {
 }
 
 test_that("quarter strings are reformatted as year-quarter", {
+  skip_if_not_installed("zoo")
   parsed <- make_minimal_json_stat()
   out <- .tidy_response_json(
     parsed_json = parsed,
@@ -56,14 +57,16 @@ test_that("quarter strings are reformatted as year-quarter", {
     metadata = make_minimal_metadata(),
     include_status = FALSE,
     character_as_factor = TRUE,
-    quarter_as = "year_quarter"
+    convert_quarter_to_yearqtr = TRUE,
+    convert_month_to_yearmon = FALSE
   )
 
-  expect_equal(as.character(out$Tid_code), c("2024-Q1", "2024-Q2"))
-  expect_equal(as.character(out$Tid_label), c("2024-Q1", "2024-Q2"))
+  expect_true("yearqtr" %in% class(out$Tid_code))
+  expect_true("yearqtr" %in% class(out$Tid_label))
 })
 
 test_that("character columns are converted to factors except quarter columns", {
+  skip_if_not_installed("zoo")
   parsed <- make_minimal_json_stat()
   out <- .tidy_response_json(
     parsed_json = parsed,
@@ -73,16 +76,17 @@ test_that("character columns are converted to factors except quarter columns", {
     metadata = make_minimal_metadata(),
     include_status = FALSE,
     character_as_factor = TRUE,
-    quarter_as = "year_quarter"
+    convert_quarter_to_yearqtr = TRUE,
+    convert_month_to_yearmon = FALSE
   )
 
   expect_true(is.factor(out$Region_code))
   expect_true(is.factor(out$Region_label))
-  expect_true(is.character(out$Tid_code))
-  expect_true(is.character(out$Tid_label))
+  expect_true("yearqtr" %in% class(out$Tid_code))
+  expect_true("yearqtr" %in% class(out$Tid_label))
 })
 
-test_that("quarter_as character leaves quarter values unchanged", {
+test_that("disabled quarter conversion leaves quarter values unchanged", {
   parsed <- make_minimal_json_stat()
   out <- .tidy_response_json(
     parsed_json = parsed,
@@ -92,7 +96,8 @@ test_that("quarter_as character leaves quarter values unchanged", {
     metadata = make_minimal_metadata(),
     include_status = FALSE,
     character_as_factor = TRUE,
-    quarter_as = "character"
+    convert_quarter_to_yearqtr = FALSE,
+    convert_month_to_yearmon = FALSE
   )
 
   expect_equal(as.character(out$Tid_code), c("2024K1", "2024K2"))
@@ -100,6 +105,7 @@ test_that("quarter_as character leaves quarter values unchanged", {
 })
 
 test_that("character_as_factor FALSE preserves character columns", {
+  skip_if_not_installed("zoo")
   parsed <- make_minimal_json_stat()
   out <- .tidy_response_json(
     parsed_json = parsed,
@@ -109,7 +115,8 @@ test_that("character_as_factor FALSE preserves character columns", {
     metadata = make_minimal_metadata(),
     include_status = FALSE,
     character_as_factor = FALSE,
-    quarter_as = "year_quarter"
+    convert_quarter_to_yearqtr = TRUE,
+    convert_month_to_yearmon = FALSE
   )
 
   expect_true(is.character(out$Region_code))
@@ -126,7 +133,8 @@ test_that("non-quarter character columns are not reformatted as quarters", {
   converted <- .apply_output_types(
     grid,
     character_as_factor = TRUE,
-    quarter_as = "year_quarter"
+    convert_quarter_to_yearqtr = TRUE,
+    convert_month_to_yearmon = FALSE
   )
 
   expect_true(is.factor(converted$foo))
@@ -144,7 +152,8 @@ test_that("JSON-stat values align with last dimension varying fastest", {
     metadata = make_minimal_metadata(),
     include_status = FALSE,
     character_as_factor = FALSE,
-    quarter_as = "character"
+    convert_quarter_to_yearqtr = FALSE,
+    convert_month_to_yearmon = FALSE
   )
 
   expect_equal(out$Yrke_code, c("0-9", "0-9", "1", "1"))

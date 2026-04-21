@@ -1,57 +1,57 @@
 test_that(".validate_main_args rejects invalid table_id", {
-  expect_error(.validate_main_args("", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, "year_quarter"), "non-empty")
+  expect_error(.validate_main_args("", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, TRUE, TRUE), "non-empty")
 })
 
 test_that(".validate_main_args rejects invalid language", {
-  expect_error(.validate_main_args("12452", "fr", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, "year_quarter"), "\"no\" or \"en\"")
+  expect_error(.validate_main_args("12452", "fr", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, TRUE, TRUE), "\"no\" or \"en\"")
 })
 
 test_that(".validate_main_args rejects invalid as_tibble", {
-  expect_error(.validate_main_args("12452", "no", "yes", FALSE, "wide", FALSE, FALSE, TRUE, "year_quarter"), "TRUE or FALSE")
+  expect_error(.validate_main_args("12452", "no", "yes", FALSE, "wide", FALSE, FALSE, TRUE, TRUE, TRUE), "TRUE or FALSE")
 })
 
 test_that(".validate_main_args rejects invalid override_large_query", {
-  expect_error(.validate_main_args("12452", "no", TRUE, "yes", "wide", FALSE, FALSE, TRUE, "year_quarter"), "TRUE or FALSE")
+  expect_error(.validate_main_args("12452", "no", TRUE, "yes", "wide", FALSE, FALSE, TRUE, TRUE, TRUE), "TRUE or FALSE")
 })
 
 test_that(".validate_main_args rejects invalid table_format", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "pivot", FALSE, FALSE, TRUE, "year_quarter"), "wide.*long|long.*wide")
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "pivot", FALSE, FALSE, TRUE, TRUE, TRUE), "wide.*long|long.*wide")
 })
 
 test_that(".validate_main_args rejects empty table_format", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "", FALSE, FALSE, TRUE, "year_quarter"), "wide.*long|long.*wide")
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "", FALSE, FALSE, TRUE, TRUE, TRUE), "wide.*long|long.*wide")
 })
 
 test_that(".validate_main_args rejects invalid include_singleton_dims", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", "maybe", FALSE, TRUE, "year_quarter"), "TRUE or FALSE")
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", "maybe", FALSE, TRUE, TRUE, TRUE), "TRUE or FALSE")
 })
 
 test_that(".validate_main_args rejects invalid include_status", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, "maybe", TRUE, "year_quarter"), "TRUE or FALSE")
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, "maybe", TRUE, TRUE, TRUE), "TRUE or FALSE")
 })
 
 test_that(".validate_main_args rejects invalid character_as_factor", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, "yes", "year_quarter"), "TRUE or FALSE")
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, "yes", TRUE, TRUE), "TRUE or FALSE")
 })
 
-test_that(".validate_main_args rejects invalid quarter_as", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, "ISO_week"), "year_quarter.*character|character.*year_quarter")
+test_that(".validate_main_args rejects invalid convert_quarter_to_yearqtr", {
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, "ISO_week", TRUE), "convert_quarter_to_yearqtr")
 })
 
-test_that(".validate_main_args rejects empty quarter_as", {
-  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, ""), "non-empty")
+test_that(".validate_main_args rejects invalid convert_month_to_yearmon", {
+  expect_error(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, TRUE, ""), "convert_month_to_yearmon")
 })
 
 test_that(".validate_main_args accepts valid long format", {
-  expect_silent(.validate_main_args("12452", "no", TRUE, FALSE, "long", FALSE, FALSE, TRUE, "year_quarter"))
+  expect_silent(.validate_main_args("12452", "no", TRUE, FALSE, "long", FALSE, FALSE, TRUE, TRUE, TRUE))
 })
 
-test_that(".validate_main_args accepts valid character quarter_as", {
-  expect_silent(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, "character"))
+test_that(".validate_main_args accepts valid boolean conversion flags", {
+  expect_silent(.validate_main_args("12452", "no", TRUE, FALSE, "wide", FALSE, FALSE, TRUE, FALSE, FALSE))
 })
 
 test_that(".validate_main_args with different language", {
-  expect_silent(.validate_main_args("12452", "en", FALSE, TRUE, "long", TRUE, TRUE, FALSE, "character"))
+  expect_silent(.validate_main_args("12452", "en", FALSE, TRUE, "long", TRUE, TRUE, FALSE, FALSE, FALSE))
 })
 
 test_that(".validate_chunking_args rejects non-numeric max_get_query_chars", {
