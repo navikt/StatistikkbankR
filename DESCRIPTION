@@ -23,3 +23,4 @@ Imports:
     httr2,
     jsonlite,
     rlang
+URL: https://navikt.github.io/StatistikkbankR/
