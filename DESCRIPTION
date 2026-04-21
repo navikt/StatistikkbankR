@@ -22,5 +22,6 @@ Imports:
     dplyr,
     httr2,
     jsonlite,
-    rlang
+    rlang,
+    zoo
 URL: https://navikt.github.io/StatistikkbankR/
