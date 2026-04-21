@@ -25,6 +25,27 @@ make_minimal_metadata <- function() {
   )
 }
 
+make_two_dim_json_stat <- function() {
+  list(
+    id = list("Yrke", "Tid"),
+    dimension = list(
+      Yrke = list(
+        category = list(
+          index = list(`0-9` = 0, `1` = 1),
+          label = list(`0-9` = "Alle yrker", `1` = "Ledere")
+        )
+      ),
+      Tid = list(
+        category = list(
+          index = list(`2024K1` = 0, `2024K2` = 1),
+          label = list(`2024K1` = "2024K1", `2024K2` = "2024K2")
+        )
+      )
+    ),
+    value = list(10, 11, 20, 21)
+  )
+}
+
 test_that("quarter strings are reformatted as year-quarter", {
   parsed <- make_minimal_json_stat()
   out <- .tidy_response_json(
@@ -111,4 +132,22 @@ test_that("non-quarter character columns are not reformatted as quarters", {
   expect_true(is.factor(converted$foo))
   expect_true(is.factor(converted$bar))
   expect_equal(as.character(converted$bar), c("2024K1", "x"))
+})
+
+test_that("JSON-stat values align with last dimension varying fastest", {
+  parsed <- make_two_dim_json_stat()
+  out <- .tidy_response_json(
+    parsed_json = parsed,
+    as_tibble = FALSE,
+    table_format = "wide",
+    include_singleton_dims = FALSE,
+    metadata = make_minimal_metadata(),
+    include_status = FALSE,
+    character_as_factor = FALSE,
+    quarter_as = "character"
+  )
+
+  expect_equal(out$Yrke_code, c("0-9", "0-9", "1", "1"))
+  expect_equal(out$Tid_code, c("2024K1", "2024K2", "2024K1", "2024K2"))
+  expect_equal(out$value, c(10, 11, 20, 21))
 })
