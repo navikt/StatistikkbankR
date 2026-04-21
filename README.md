@@ -25,8 +25,18 @@ directly in R.
 Install the development version from GitHub:
 
 ``` r
-# install.packages("pak")
-pak::pak("navikt/StatistikkbankR")
+# install.packages("remotes")
+remotes::install_github("navikt/statistikkbankR")
+```
+
+### Nav firewall
+
+If you work in Nav and use VDI Analyse, R may fail to verify SSL
+certificates and you get an error when trying to install. In that case,
+try running the command:
+
+``` r
+Sys.setenv(R_LIBCURL_SSL_REVOKE_BEST_EFFORT = "TRUE")
 ```
 
 ## Finding a table
