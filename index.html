@@ -57,14 +57,21 @@
 </h2>
 <p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"navikt/StatistikkbankR"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"navikt/statistikkbankR"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="nav-firewall">Nav firewall<a class="anchor" aria-label="anchor" href="#nav-firewall"></a>
+</h3>
+<p>If you work in Nav and use VDI Analyse, R may fail to verify SSL certificates and you get an error when trying to install. In that case, try running the command:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>R_LIBCURL_SSL_REVOKE_BEST_EFFORT <span class="op">=</span> <span class="st">"TRUE"</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="finding-a-table">Finding a table<a class="anchor" aria-label="anchor" href="#finding-a-table"></a>
 </h2>
 <p>Use <code><a href="reference/ssb_search.html">ssb_search()</a></code> to find tables by keyword. The function returns a data frame with one row per matching table; the <code>id</code> column is what you will pass to other functions.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://navikt.github.io/StatistikkbankR/">StatistikkbankR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Search for tables about population (in Norwegian)</span></span>
@@ -74,7 +81,7 @@
 <span><span class="co"># Or search in English</span></span>
 <span><span class="fu"><a href="reference/ssb_search.html">ssb_search</a></span><span class="op">(</span><span class="st">"population"</span>, language <span class="op">=</span> <span class="st">"en"</span><span class="op">)</span></span></code></pre></div>
 <p>SSB paginates search results; use <code>fetch_all = TRUE</code> if you want all pages at once.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Retrieve all pages at once</span></span>
 <span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ssb_search.html">ssb_search</a></span><span class="op">(</span><span class="st">"arbeid"</span>, fetch_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">all_results</span><span class="op">)</span></span></code></pre></div>
@@ -84,7 +91,7 @@
 <h2 id="inspecting-a-table-before-downloading">Inspecting a table before downloading<a class="anchor" aria-label="anchor" href="#inspecting-a-table-before-downloading"></a>
 </h2>
 <p>Once you have a table identifier, use <code><a href="reference/ssb_describe.html">ssb_describe()</a></code> to see its structure before downloading it. This is the recommended first command to run once you have a table you’re interested in.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ssb_describe.html">ssb_describe</a></span><span class="op">(</span><span class="st">"07459"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Table-level summary: title, last updated, estimated total rows</span></span>
@@ -93,7 +100,7 @@
 <span><span class="co"># One row per dimension: id, label, role, number of codes</span></span>
 <span><span class="va">desc</span><span class="op">$</span><span class="va">dimensions</span></span></code></pre></div>
 <p>Use <code><a href="reference/ssb_codes.html">ssb_codes()</a></code> to list the valid values you can use as filters for a given dimension:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># All valid codes for the Region dimension</span></span>
 <span><span class="fu"><a href="reference/ssb_codes.html">ssb_codes</a></span><span class="op">(</span><span class="st">"07459"</span>, <span class="st">"Region"</span><span class="op">)</span></span>
 <span></span>
@@ -107,7 +114,7 @@
 <h3 id="without-filters">Without filters<a class="anchor" aria-label="anchor" href="#without-filters"></a>
 </h3>
 <p>Pass a table identifier to <code><a href="reference/get_ssb_data.html">get_ssb_data()</a></code> to download the full table. SSB enforces a cell limit on large tables; the function will warn you and stop if the estimated row count is too high.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Download all data (only works for small tables)</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span><span class="st">"05803"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
@@ -116,7 +123,7 @@
 <h3 id="filtering-by-dimension">Filtering by dimension<a class="anchor" aria-label="anchor" href="#filtering-by-dimension"></a>
 </h3>
 <p>Pass dimension identifiers as named arguments to select only the rows you need. Each argument accepts a character vector of codes.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Download population for specific regions for the years 2020, 2021 and 2022</span></span>
 <span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
@@ -149,7 +156,7 @@
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The three most recent years for all regions</span></span>
 <span><span class="va">pop_recent</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
@@ -162,7 +169,7 @@
 <h2 id="long-format-and-singleton-dimensions">Long format and singleton dimensions<a class="anchor" aria-label="anchor" href="#long-format-and-singleton-dimensions"></a>
 </h2>
 <p>By default <code><a href="reference/get_ssb_data.html">get_ssb_data()</a></code> returns data in wide format: one column per measure code. Use <code>table_format = "long"</code> to get a long table instead, with one row per observation.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
 <span>    Region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0301"</span>, <span class="st">"1103"</span><span class="op">)</span>,</span>
@@ -171,7 +178,7 @@
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pop_long</span><span class="op">)</span></span></code></pre></div>
 <p>When filtering to a single code in one dimension, that dimension collapses to a constant and is dropped from the wide output but retained in long output by default. Pass <code>include_singleton_dims = TRUE</code> with <code>table_format = "long"</code> to include those constant-value columns explicitly:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_one_region</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
 <span>    Region                 <span class="op">=</span> <span class="st">"0301"</span>,</span>
@@ -186,18 +193,18 @@
 <p>SSB provides aggregation codelists that let you request data at a different grouping level — for example, historical municipality boundaries — without manually remapping individual codes.</p>
 <p>SSB’s <a href="https://statisticsnorway.github.io/ssb-klassr/" class="external-link"><code>klassR</code></a> package provides an easy interface for retrieving SSB classifications, and may be used alongside this package.</p>
 <p>Use <code><a href="reference/ssb_codelists.html">ssb_codelists()</a></code> to discover which codelists are available:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/ssb_codelists.html">ssb_codelists</a></span><span class="op">(</span><span class="st">"07459"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Filter to the geographic dimension</span></span>
 <span><span class="fu"><a href="reference/ssb_codelists.html">ssb_codelists</a></span><span class="op">(</span><span class="st">"07459"</span>, dimension <span class="op">=</span> <span class="st">"Region"</span><span class="op">)</span></span></code></pre></div>
 <p>Use <code><a href="reference/ssb_codelist_details.html">ssb_codelist_details()</a></code> to inspect the group-to-member mapping inside a specific codelist:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ssb_codelist_details.html">ssb_codelist_details</a></span><span class="op">(</span><span class="st">"agg_KommSummer"</span><span class="op">)</span></span>
 <span><span class="va">cl</span><span class="op">$</span><span class="va">codelist</span>   <span class="co"># metadata</span></span>
 <span><span class="va">cl</span><span class="op">$</span><span class="va">values</span>     <span class="co"># group codes and their members</span></span></code></pre></div>
 <p>Apply a codelist when downloading data by passing the <code>codelists</code> and <code>output_values</code> arguments to <code><a href="reference/get_ssb_data.html">get_ssb_data()</a></code>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_agg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
 <span>    Tid           <span class="op">=</span> <span class="fl">2020</span><span class="op">:</span><span class="fl">2022</span>,</span>
@@ -205,7 +212,7 @@
 <span>    output_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Region <span class="op">=</span> <span class="st">"aggregated"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Or use the convenience wrapper <code><a href="reference/ssb_get_by_codelist.html">ssb_get_by_codelist()</a></code> which identifies the correct dimension automatically:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_agg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ssb_get_by_codelist.html">ssb_get_by_codelist</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
 <span>    <span class="st">"agg_KommSummer"</span>,</span>
@@ -213,7 +220,7 @@
 <span>    output_value <span class="op">=</span> <span class="st">"aggregated"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>To join the aggregated result back to individual municipality codes, use <code><a href="reference/ssb_expand_codelist_mapping.html">ssb_expand_codelist_mapping()</a></code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_expanded</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ssb_expand_codelist_mapping.html">ssb_expand_codelist_mapping</a></span><span class="op">(</span></span>
 <span>    data        <span class="op">=</span> <span class="va">pop_agg</span>,</span>
 <span>    code_col    <span class="op">=</span> <span class="st">"Region_code"</span>,</span>
@@ -228,7 +235,7 @@
 <h3 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h3>
 <p>By default, <code><a href="reference/get_ssb_data.html">get_ssb_data()</a></code> and all helper functions cache table metadata in memory for the duration of your R session. Set <code>cache = FALSE</code> to disable caching, or <code>refresh_metadata = TRUE</code> to discard the cached copy and fetch fresh metadata:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Force a fresh metadata fetch (e.g. after SSB updates the table)</span></span>
 <span><span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span><span class="st">"07459"</span>, Tid <span class="op">=</span> <span class="st">"top(1)"</span>, refresh_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>For details on when SSB updates their tables, see their <a href="website">https://www.ssb.no/en/statbank/</a>.</p>
@@ -237,7 +244,7 @@
 <h3 id="large-tables">Large tables<a class="anchor" aria-label="anchor" href="#large-tables"></a>
 </h3>
 <p>SSB imposes a cell limit on queries. <code><a href="reference/get_ssb_data.html">get_ssb_data()</a></code> estimates the result size before sending the request and stops with a message if the query is too large. To proceed anyway, set <code>override_large_query = TRUE</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_ssb_data.html">get_ssb_data</a></span><span class="op">(</span></span>
 <span>    <span class="st">"07459"</span>,</span>
 <span>    override_large_query <span class="op">=</span> <span class="cn">TRUE</span></span>
