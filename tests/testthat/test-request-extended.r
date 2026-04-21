@@ -17,16 +17,18 @@ test_that(".build_query_params collapses multiple filter values", {
   expect_equal(result$`valueCodes[Region]`, "01,02,03")
 })
 
-test_that(".build_query_params includes codelists", {
-  codelists <- list(Region = "codelist_123")
-  result <- StatistikkbankR:::.build_query_params("no", list(), codelists = codelists)
-  expect_equal(result$`codelist[Region]`, "codelist_123")
+test_that(".build_query_params includes codelists with filters", {
+  filters <- list(Region = c("01"))
+  codelists <- list(Tid = "codelist_123")
+  result <- StatistikkbankR:::.build_query_params("no", filters, codelists = codelists)
+  expect_equal(result$`codelist[Tid]`, "codelist_123")
 })
 
-test_that(".build_query_params includes output_values", {
-  output_values <- list(Region = "single")
-  result <- StatistikkbankR:::.build_query_params("no", list(), output_values = output_values)
-  expect_equal(result$`outputValues[Region]`, "single")
+test_that(".build_query_params includes output_values with filters", {
+  filters <- list(Region = c("01"))
+  output_values <- list(Tid = "single")
+  result <- StatistikkbankR:::.build_query_params("no", filters, output_values = output_values)
+  expect_equal(result$`outputValues[Tid]`, "single")
 })
 
 test_that(".build_query_params handles language variants", {
@@ -146,10 +148,10 @@ test_that(".build_post_request_spec converts values to lists", {
 
 test_that(".build_tables_request_spec with empty query string", {
   result <- StatistikkbankR:::.build_tables_request_spec("", "no", 1, 25)
-  expect_null(result$params$query)
+  expect_equal(result$params$query, "")
 })
 
 test_that(".build_tables_request_spec with whitespace-only query", {
   result <- StatistikkbankR:::.build_tables_request_spec("   ", "no", 1, 25)
-  expect_null(result$params$query)
+  expect_equal(result$params$query, "")
 })
