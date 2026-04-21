@@ -26,7 +26,7 @@ economy, labour, housing, and health.
 The `StatistikkbankR` package gives you a direct R interface to the
 Statistikkbank API.  You can search the table catalogue, inspect
 table structure, and download data as tidy `data.frame` or
-tibble objects, directly in R.
+`tibble` objects, directly in R.
 
 ## Installation
 
