@@ -64,7 +64,6 @@ make_common_get_ssb_data_mocks <- function() {
     .validate_output_values_against_codelists = function(...) NULL,
     .validate_filter_values_against_metadata = function(...) NULL,
     .normalise_filters = function(filters) filters,
-    .normalise_quarter_as = function(x) tolower(trimws(x)),
     .normalise_codelists = function(x) if (is.null(x)) list() else x,
     .normalise_output_values = function(x) if (is.null(x)) list() else x,
     .get_api_config = function(...) make_get_ssb_api_config_stub(),
@@ -293,7 +292,7 @@ test_that("get_ssb_data preserves JSON-stat observation order in tidy output", {
         "12452",
         as_tibble = FALSE,
         character_as_factor = FALSE,
-        quarter_as = "character"
+        convert_quarter_to_yearqtr = FALSE
       )
 
       expect_equal(out$Yrke_code, c("0-9", "0-9", "1", "1"))

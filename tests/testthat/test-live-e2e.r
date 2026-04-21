@@ -110,7 +110,8 @@ expect_package_matches_live_jsonstat <- function(table_id, language = "no") {
       table_format = "wide",
       include_singleton_dims = TRUE,
       character_as_factor = FALSE,
-      quarter_as = "character",
+      convert_quarter_to_yearqtr = FALSE,
+      convert_month_to_yearmon = FALSE,
       cache = FALSE,
       refresh_metadata = TRUE
     ),
