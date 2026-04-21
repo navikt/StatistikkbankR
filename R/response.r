@@ -271,18 +271,22 @@
     label_values[[dimension_id]] <- labels
   }
 
+  grid_dimension_ids <- rev(dimension_ids)
+
   code_grid <- expand.grid(
-    code_values,
+    code_values[grid_dimension_ids],
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
+  code_grid <- code_grid[dimension_ids]
   names(code_grid) <- vapply(dimension_ids, .dimension_code_col_name, character(1))
 
   label_grid <- expand.grid(
-    label_values,
+    label_values[grid_dimension_ids],
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
+  label_grid <- label_grid[dimension_ids]
   names(label_grid) <- vapply(dimension_ids, .dimension_label_col_name, character(1))
 
   grid <- cbind(code_grid, label_grid, stringsAsFactors = FALSE)
