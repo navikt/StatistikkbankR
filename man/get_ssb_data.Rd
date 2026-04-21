@@ -14,7 +14,8 @@ get_ssb_data(
   include_singleton_dims = FALSE,
   include_status = FALSE,
   character_as_factor = TRUE,
-  quarter_as = "year_quarter",
+  convert_quarter_to_yearqtr = TRUE,
+  convert_month_to_yearmon = TRUE,
   codelists = NULL,
   output_values = NULL,
   cache = TRUE,
@@ -82,10 +83,15 @@ dimension label columns are returned as factors, which preserves the
 ordering that SSB defines for the codes.  Set to \code{FALSE} to keep
 them as plain character strings.}
 
-\item{quarter_as}{Character.  Controls how quarterly time codes are
-formatted in the result.  The default \code{"year_quarter"} converts
-codes such as \code{"2024K1"} to \code{"2024-Q1"}.  Use \code{"character"} to
-keep the original code string unchanged.}
+\item{convert_quarter_to_yearqtr}{Logical.  If \code{TRUE} (the default),
+quarterly time codes such as \code{"2024K1"} are converted to
+\link[zoo:yearqtr]{zoo::yearqtr} objects, which are suitable for time series analysis.
+Set to \code{FALSE} to keep the original SSB code strings.}
+
+\item{convert_month_to_yearmon}{Logical.  If \code{TRUE} (the default),
+monthly time codes such as \code{"2024M01"} are converted to
+\link[zoo:yearmon]{zoo::yearmon} objects, which are suitable for time series analysis.
+Set to \code{FALSE} to keep the original SSB code strings.}
 
 \item{codelists}{Named list.  Applies an SSB aggregation grouping
 (codelist) to one or more dimensions.  This is how you request data
@@ -182,11 +188,12 @@ individual member code (\code{"single"}).  See \code{\link[=ssb_codelists]{ssb_c
 
 \section{Time formatting}{
 
-SSB encodes quarters in the form \code{"YYYYKn"} (e.g., \code{"2024K1"}).
-With the default \code{quarter_as = "year_quarter"} these are reformatted
-to \code{"YYYY-Qn"} (e.g., \code{"2024-Q1"}), which sorts and displays
-correctly in most tools.  Set \code{quarter_as = "character"} to suppress
-reformatting and keep the original SSB encoding.
+SSB encodes quarters in the form \code{"YYYYKn"} (e.g., \code{"2024K1"}) and
+months in the form \code{"YYYYMmm"} (e.g., \code{"2024M01"}). By default,
+quarterly codes are converted to \link[zoo:yearqtr]{zoo::yearqtr} and monthly codes are
+converted to \link[zoo:yearmon]{zoo::yearmon}. Set \code{convert_quarter_to_yearqtr = FALSE}
+and/or \code{convert_month_to_yearmon = FALSE} to keep original SSB code
+strings.
 }
 
 \examples{
@@ -244,13 +251,21 @@ dat_status <- get_ssb_data(
     include_status = TRUE
 )
 
-# --- 8. Quarter time values -------------------------------------------
+# --- 8. Quarterly time values as zoo::yearqtr ---------------------------
 # Table 12452 has quarterly time codes such as "2024K1".
-# The default formats them as "2024-Q1".
+# By default, these are converted to zoo::yearqtr objects.
 dat_q <- get_ssb_data(
     "12452",
     Tid = "top(4)"
 )
+
+# --- 9. Monthly time values as zoo::yearmon ---------------------------
+# Table 13966 has monthly time codes such as "2024M01".
+# By default, these are converted to zoo::yearmon objects.
+# dat_m <- get_ssb_data(
+#     "13966",
+#     Tid = "top(4)"
+# )
 }
 
 }
