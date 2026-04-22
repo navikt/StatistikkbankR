@@ -22,7 +22,8 @@ get_ssb_data(
   include_singleton_dims = FALSE,
   include_status = FALSE,
   character_as_factor = TRUE,
-  quarter_as = "year_quarter",
+  convert_quarter_to_yearqtr = TRUE,
+  convert_month_to_yearmon = TRUE,
   codelists = NULL,
   output_values = NULL,
   cache = TRUE,
@@ -123,12 +124,21 @@ get_ssb_data(
   as factors, which preserves the ordering that SSB defines for the
   codes. Set to `FALSE` to keep them as plain character strings.
 
-- quarter_as:
+- convert_quarter_to_yearqtr:
 
-  Character. Controls how quarterly time codes are formatted in the
-  result. The default `"year_quarter"` converts codes such as `"2024K1"`
-  to `"2024-Q1"`. Use `"character"` to keep the original code string
-  unchanged.
+  Logical. If `TRUE` (the default), quarterly time codes such as
+  `"2024K1"` are converted to
+  [zoo::yearqtr](https://rdrr.io/pkg/zoo/man/yearqtr.html) objects,
+  which are suitable for time series analysis. Set to `FALSE` to keep
+  the original SSB code strings.
+
+- convert_month_to_yearmon:
+
+  Logical. If `TRUE` (the default), monthly time codes such as
+  `"2024M01"` are converted to
+  [zoo::yearmon](https://rdrr.io/pkg/zoo/man/yearmon.html) objects,
+  which are suitable for time series analysis. Set to `FALSE` to keep
+  the original SSB code strings.
 
 - codelists:
 
@@ -233,11 +243,14 @@ for discovery and convenience wrappers.
 
 ## Time formatting
 
-SSB encodes quarters in the form `"YYYYKn"` (e.g., `"2024K1"`). With the
-default `quarter_as = "year_quarter"` these are reformatted to
-`"YYYY-Qn"` (e.g., `"2024-Q1"`), which sorts and displays correctly in
-most tools. Set `quarter_as = "character"` to suppress reformatting and
-keep the original SSB encoding.
+SSB encodes quarters in the form `"YYYYKn"` (e.g., `"2024K1"`) and
+months in the form `"YYYYMmm"` (e.g., `"2024M01"`). By default,
+quarterly codes are converted to
+[zoo::yearqtr](https://rdrr.io/pkg/zoo/man/yearqtr.html) and monthly
+codes are converted to
+[zoo::yearmon](https://rdrr.io/pkg/zoo/man/yearmon.html). Set
+`convert_quarter_to_yearqtr = FALSE` and/or
+`convert_month_to_yearmon = FALSE` to keep original SSB code strings.
 
 ## See also
 
@@ -309,12 +322,20 @@ dat_status <- get_ssb_data(
     include_status = TRUE
 )
 
-# --- 8. Quarter time values -------------------------------------------
+# --- 8. Quarterly time values as zoo::yearqtr ---------------------------
 # Table 12452 has quarterly time codes such as "2024K1".
-# The default formats them as "2024-Q1".
+# By default, these are converted to zoo::yearqtr objects.
 dat_q <- get_ssb_data(
     "12452",
     Tid = "top(4)"
 )
+
+# --- 9. Monthly time values as zoo::yearmon ---------------------------
+# Table 13966 has monthly time codes such as "2024M01".
+# By default, these are converted to zoo::yearmon objects.
+# dat_m <- get_ssb_data(
+#     "13966",
+#     Tid = "top(4)"
+# )
 } # }
 ```

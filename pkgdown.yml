@@ -2,7 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles: {}
-last_built: 2026-04-21T08:18Z
+last_built: 2026-04-22T07:27Z
 urls:
   reference: https://navikt.github.io/StatistikkbankR/reference
   article: https://navikt.github.io/StatistikkbankR/articles
