@@ -26,7 +26,9 @@ economy, labour, housing, and health.
 The `StatistikkbankR` package gives you a direct R interface to the
 Statistikkbank API.  You can search the table catalogue, inspect
 table structure, and download data as tidy `data.frame` or
-tibble objects, directly in R.
+`tibble` objects, directly in R.
+
+This package has been written using GitHub Copilot with Codex and Claude.
 
 ## Installation
 
@@ -182,6 +184,47 @@ pop_one_region <- get_ssb_data(
     table_format           = "long",
     include_singleton_dims = TRUE
 )
+```
+
+## Time classes (zoo::yearqtr and zoo::yearmon)
+
+By default, `get_ssb_data()` converts quarterly time codes to
+`zoo::yearqtr` and monthly time codes to `zoo::yearmon`.
+
+```{r time-classes, eval = FALSE}
+# Quarterly table (12452): Tid becomes yearqtr by default
+q_dat <- get_ssb_data(
+    "12452",
+    Tid = "top(4)",
+    character_as_factor = FALSE
+)
+class(q_dat$Tid_label)
+
+# Disable quarter conversion and keep raw SSB codes like "2024K1"
+q_raw <- get_ssb_data(
+    "12452",
+    Tid = "top(4)",
+    character_as_factor = FALSE,
+    convert_quarter_to_yearqtr = FALSE
+)
+head(q_raw$Tid_label)
+
+# Monthly table (13966): Tid becomes yearmon by default
+m_dat <- get_ssb_data(
+    "13966",
+    Tid = "top(4)",
+    character_as_factor = FALSE
+)
+class(m_dat$Tid_label)
+
+# Disable month conversion and keep raw SSB codes like "2024M01"
+m_raw <- get_ssb_data(
+    "13966",
+    Tid = "top(4)",
+    character_as_factor = FALSE,
+    convert_month_to_yearmon = FALSE
+)
+head(m_raw$Tid_label)
 ```
 
 ## Codelists and geographic boundary changes

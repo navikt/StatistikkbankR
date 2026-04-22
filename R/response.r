@@ -203,6 +203,10 @@
   all(.is_quarter_string(non_missing))
 }
 
+.is_month_string <- function(x) {
+  grepl("^[0-9]{4}[Mm](0[1-9]|1[0-2])$", x)
+}
+
 .format_as_year_quarter <- function(x) {
   ifelse(
     is.na(x),
@@ -211,7 +215,46 @@
   )
 }
 
-.apply_output_types <- function(grid, character_as_factor, quarter_as) {
+.is_month_column <- function(x) {
+  if (!is.character(x)) {
+    return(FALSE)
+  }
+
+  non_missing <- x[!is.na(x)]
+  if (length(non_missing) == 0) {
+    return(FALSE)
+  }
+
+  all(.is_month_string(non_missing))
+}
+
+.convert_to_yearqtr <- function(x) {
+  if (requireNamespace("zoo", quietly = TRUE)) {
+    formatted <- .format_as_year_quarter(x)
+    zoo::as.yearqtr(formatted, format = "%Y-Q%q")
+  } else {
+    rlang::warn("zoo package required for yearqtr conversion; returning original values")
+    x
+  }
+}
+
+.convert_to_yearmon <- function(x) {
+  if (requireNamespace("zoo", quietly = TRUE)) {
+    formatted <- ifelse(is.na(x), NA_character_, paste0(substr(x, 1, 4), "-", substr(x, 6, 7)))
+    zoo::as.yearmon(formatted, format = "%Y-%m")
+  } else {
+    rlang::warn("zoo package required for yearmon conversion; returning original values")
+    x
+  }
+}
+
+.apply_output_types <- function(grid, character_as_factor, convert_quarter_to_yearqtr = TRUE, convert_month_to_yearmon = TRUE) {
+  if (is.character(convert_quarter_to_yearqtr)) {
+    legacy_mode <- tolower(trimws(convert_quarter_to_yearqtr))
+    convert_quarter_to_yearqtr <- identical(legacy_mode, "year_quarter")
+    convert_month_to_yearmon <- FALSE
+  }
+
   character_columns <- names(grid)[vapply(grid, is.character, logical(1))]
   if (length(character_columns) == 0) {
     return(grid)
@@ -223,15 +266,35 @@
     logical(1)
   )]
 
-  if (quarter_as == "year_quarter" && length(quarter_columns) > 0) {
+  month_columns <- character_columns[vapply(
+    character_columns,
+    function(col_name) .is_month_column(grid[[col_name]]),
+    logical(1)
+  )]
+
+  if (convert_quarter_to_yearqtr && length(quarter_columns) > 0) {
     for (col_name in quarter_columns) {
-      grid[[col_name]] <- .format_as_year_quarter(grid[[col_name]])
+      grid[[col_name]] <- .convert_to_yearqtr(grid[[col_name]])
     }
   }
 
-  if (character_as_factor) {
-    factor_columns <- setdiff(character_columns, quarter_columns)
-    for (col_name in factor_columns) {
+  if (convert_month_to_yearmon && length(month_columns) > 0) {
+    for (col_name in month_columns) {
+      grid[[col_name]] <- .convert_to_yearmon(grid[[col_name]])
+    }
+  }
+
+  non_temporal_factor_columns <- setdiff(
+    character_columns,
+    if (convert_quarter_to_yearqtr) quarter_columns else character(0)
+  )
+  non_temporal_factor_columns <- setdiff(
+    non_temporal_factor_columns,
+    if (convert_month_to_yearmon) month_columns else character(0)
+  )
+
+  if (character_as_factor && length(non_temporal_factor_columns) > 0) {
+    for (col_name in non_temporal_factor_columns) {
       grid[[col_name]] <- factor(grid[[col_name]])
     }
   }
@@ -247,7 +310,8 @@
   metadata = NULL,
   include_status = FALSE,
   character_as_factor = TRUE,
-  quarter_as = "year_quarter"
+  convert_quarter_to_yearqtr = TRUE,
+  convert_month_to_yearmon = TRUE
 ) {
   dimension_ids <- unlist(parsed_json$id, use.names = FALSE)
   raw_dimensions <- parsed_json$dimension
@@ -271,18 +335,22 @@
     label_values[[dimension_id]] <- labels
   }
 
+  grid_dimension_ids <- rev(dimension_ids)
+
   code_grid <- expand.grid(
-    code_values,
+    code_values[grid_dimension_ids],
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
+  code_grid <- code_grid[dimension_ids]
   names(code_grid) <- vapply(dimension_ids, .dimension_code_col_name, character(1))
 
   label_grid <- expand.grid(
-    label_values,
+    label_values[grid_dimension_ids],
     KEEP.OUT.ATTRS = FALSE,
     stringsAsFactors = FALSE
   )
+  label_grid <- label_grid[dimension_ids]
   names(label_grid) <- vapply(dimension_ids, .dimension_label_col_name, character(1))
 
   grid <- cbind(code_grid, label_grid, stringsAsFactors = FALSE)
@@ -349,7 +417,7 @@
   }
 
   grid <- .coerce_time_dimensions(grid, dimension_ids, table_format, metadata)
-  grid <- .apply_output_types(grid, character_as_factor, quarter_as)
+  grid <- .apply_output_types(grid, character_as_factor, convert_quarter_to_yearqtr, convert_month_to_yearmon)
 
   if (as_tibble) {
     return(dplyr::as_tibble(grid))

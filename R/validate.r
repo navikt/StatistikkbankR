@@ -27,7 +27,8 @@
   include_singleton_dims,
   include_status,
   character_as_factor,
-  quarter_as
+  convert_quarter_to_yearqtr,
+  convert_month_to_yearmon
 ) {
   .validate_table_request_args(table_id, language)
 
@@ -55,13 +56,12 @@
     rlang::abort("`character_as_factor` must be TRUE or FALSE.")
   }
 
-  if (!rlang::is_string(quarter_as) || trimws(quarter_as) == "") {
-    rlang::abort("`quarter_as` must be a single non-empty character string.")
+  if (!rlang::is_bool(convert_quarter_to_yearqtr)) {
+    rlang::abort("`convert_quarter_to_yearqtr` must be TRUE or FALSE.")
   }
 
-  quarter_as_normalized <- tolower(trimws(quarter_as))
-  if (!quarter_as_normalized %in% c("year_quarter", "character")) {
-    rlang::abort("`quarter_as` must be one of 'year_quarter' or 'character'.")
+  if (!rlang::is_bool(convert_month_to_yearmon)) {
+    rlang::abort("`convert_month_to_yearmon` must be TRUE or FALSE.")
   }
 }
 
@@ -223,9 +223,7 @@
   normalised_output_values
 }
 
-.normalise_quarter_as <- function(quarter_as) {
-  tolower(trimws(quarter_as))
-}
+
 
 .normalise_filters <- function(filters) {
   normalised_filters <- list()

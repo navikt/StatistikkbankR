@@ -1,8 +1,8 @@
 Package: StatistikkbankR
 Title: Access Statistikkbank data from Statistics Norway (SSB) 
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
-    person("Tobias", "Lunde", , "tobias.lunde@nav.no", role = c("aut", "cre"))
+    person("Tobias", "Lunde", email = "tobias.lunde@nav.no", role = c("aut", "cre"))
 Description: Provides a simple and consistent R interface to the Statistics
     Norway (SSB) Statistikkbank API.  Use it to search the table catalogue,
     inspect table dimensions and valid codes, and download data as tidy
@@ -22,5 +22,6 @@ Imports:
     dplyr,
     httr2,
     jsonlite,
-    rlang
+    rlang,
+    zoo
 URL: https://navikt.github.io/StatistikkbankR/

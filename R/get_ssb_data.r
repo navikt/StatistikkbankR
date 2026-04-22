@@ -56,10 +56,14 @@
 #'   dimension label columns are returned as factors, which preserves the
 #'   ordering that SSB defines for the codes.  Set to `FALSE` to keep
 #'   them as plain character strings.
-#' @param quarter_as Character.  Controls how quarterly time codes are
-#'   formatted in the result.  The default `"year_quarter"` converts
-#'   codes such as `"2024K1"` to `"2024-Q1"`.  Use `"character"` to
-#'   keep the original code string unchanged.
+#' @param convert_quarter_to_yearqtr Logical.  If `TRUE` (the default),
+#'   quarterly time codes such as `"2024K1"` are converted to
+#'   [zoo::yearqtr] objects, which are suitable for time series analysis.
+#'   Set to `FALSE` to keep the original SSB code strings.
+#' @param convert_month_to_yearmon Logical.  If `TRUE` (the default),
+#'   monthly time codes such as `"2024M01"` are converted to
+#'   [zoo::yearmon] objects, which are suitable for time series analysis.
+#'   Set to `FALSE` to keep the original SSB code strings.
 #' @param codelists Named list.  Applies an SSB aggregation grouping
 #'   (codelist) to one or more dimensions.  This is how you request data
 #'   at an aggregated geographic or administrative level — for example,
@@ -125,11 +129,12 @@
 #' [ssb_get_by_codelist()] for discovery and convenience wrappers.
 #'
 #' @section Time formatting:
-#' SSB encodes quarters in the form `"YYYYKn"` (e.g., `"2024K1"`).
-#' With the default `quarter_as = "year_quarter"` these are reformatted
-#' to `"YYYY-Qn"` (e.g., `"2024-Q1"`), which sorts and displays
-#' correctly in most tools.  Set `quarter_as = "character"` to suppress
-#' reformatting and keep the original SSB encoding.
+#' SSB encodes quarters in the form `"YYYYKn"` (e.g., `"2024K1"`) and
+#' months in the form `"YYYYMmm"` (e.g., `"2024M01"`). By default,
+#' quarterly codes are converted to [zoo::yearqtr] and monthly codes are
+#' converted to [zoo::yearmon]. Set `convert_quarter_to_yearqtr = FALSE`
+#' and/or `convert_month_to_yearmon = FALSE` to keep original SSB code
+#' strings.
 #'
 #' @return A [tibble][tibble::tibble] (or `data.frame` when
 #'   `as_tibble = FALSE`) where each row is one observation.  In wide
@@ -202,13 +207,21 @@
 #'     include_status = TRUE
 #' )
 #'
-#' # --- 8. Quarter time values -------------------------------------------
+#' # --- 8. Quarterly time values as zoo::yearqtr ---------------------------
 #' # Table 12452 has quarterly time codes such as "2024K1".
-#' # The default formats them as "2024-Q1".
+#' # By default, these are converted to zoo::yearqtr objects.
 #' dat_q <- get_ssb_data(
 #'     "12452",
 #'     Tid = "top(4)"
 #' )
+#'
+#' # --- 9. Monthly time values as zoo::yearmon ---------------------------
+#' # Table 13966 has monthly time codes such as "2024M01".
+#' # By default, these are converted to zoo::yearmon objects.
+#' # dat_m <- get_ssb_data(
+#' #     "13966",
+#' #     Tid = "top(4)"
+#' # )
 #' }
 #'
 #' @export
@@ -223,7 +236,8 @@ get_ssb_data <- function(
   include_singleton_dims = FALSE,
   include_status = FALSE,
   character_as_factor = TRUE,
-  quarter_as = "year_quarter",
+  convert_quarter_to_yearqtr = TRUE,
+  convert_month_to_yearmon = TRUE,
   codelists = NULL,
   output_values = NULL,
   cache = TRUE,
@@ -242,7 +256,8 @@ get_ssb_data <- function(
     include_singleton_dims,
     include_status,
     character_as_factor,
-    quarter_as
+    convert_quarter_to_yearqtr,
+    convert_month_to_yearmon
   )
   .validate_metadata_cache_args(cache, refresh_metadata)
   .validate_chunking_args(max_get_query_chars, show_chunk_progress)
@@ -252,7 +267,6 @@ get_ssb_data <- function(
   .validate_output_values(output_values)
 
   normalised_filters <- .normalise_filters(filters)
-  normalised_quarter_as <- .normalise_quarter_as(quarter_as)
   normalised_codelists <- .normalise_codelists(codelists)
   normalised_output_values <- .normalise_output_values(output_values)
   api_config <- .get_api_config(cache = cache, refresh_metadata = refresh_metadata)
@@ -324,7 +338,8 @@ get_ssb_data <- function(
       metadata,
       include_status = include_status,
       character_as_factor = character_as_factor,
-      quarter_as = normalised_quarter_as
+      convert_quarter_to_yearqtr = convert_quarter_to_yearqtr,
+      convert_month_to_yearmon = convert_month_to_yearmon
     ))
   }
 
@@ -345,6 +360,7 @@ get_ssb_data <- function(
     metadata,
     include_status = include_status,
     character_as_factor = character_as_factor,
-    quarter_as = normalised_quarter_as
+    convert_quarter_to_yearqtr = convert_quarter_to_yearqtr,
+    convert_month_to_yearmon = convert_month_to_yearmon
   )
 }
